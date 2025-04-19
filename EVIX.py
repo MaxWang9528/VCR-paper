@@ -42,12 +42,12 @@ class ExpectedVIX:
         )
 
     def calc_vix_premium(self):
-        self.data["Premium"] = np.round(self.data["VIX Level"] - self.data["Next Realized Volatility"], 2)
-        self.data["Average Premium"] = self.data["Average VIX Level"] - self.data["Average Next Realized Volatility"]
+        self.data["VIX Premium"] = np.round(self.data["VIX Level"] - self.data["Next Realized Volatility"], 2)
+        self.data["Average VIX Premium"] = self.data["Average VIX Level"] - self.data["Average Next Realized Volatility"]
 
     def calc_mr_volatility(self, days=1):
         self.data["MR Volatility"] = np.round(self.data["Recent Volatility"] + self.s/100 * (self.m - self.data["Recent Volatility"]), 2)
-        self.data["Average MR Volatility"] = np.round(self.data["MR Volatility"].rolling(window=days).mean(), 2)
+        # self.data["Average MR Volatility"] = np.round(self.data["MR Volatility"].rolling(window=days).mean(), 2)
         self.data["MR Volatility Squared"] = self.data["MR Volatility"] ** 2
 
     def calc_difference(self, days=1):
@@ -55,10 +55,33 @@ class ExpectedVIX:
         self.data["Average Difference"] = self.data["Difference"].rolling(window=days).mean()
         self.data["Squared Difference"] = self.data["VIX Level Squared"] - self.data["MR Volatility Squared"]
 
+    def calc_variance_premium(self):
+        self.data["Variance Premium"] = self.c * self.data["MR Volatility"]**2 + self.d
+
+    ########################
+    def calc_evix(self):
+        self.data["EVIX"] = np.sqrt(self.data["MR Volatility"]**2 + self.data["Variance Premium"])
+    ########################
+
+    def calc_dtm(self):
+        self.data["DTM"] = self.data["VIX Level"] - self.data["EVIX"]
+
+    def calc_volatility_premium(self):
+        self.data["Volatility Premium"] = self.data["EVIX"] - self.data["MR Volatility"]
+
+    def calc_mr_adjustment(self):
+        self.data["MR Adjustment"] = self.data["MR Volatility"] - self.data["Recent Volatility"]
+
+    def calc_vcr(self):
+        self.data["VCR"] = self.data["MR Adjustment"] + self.data["DTM"]
+
+    def check(self):
+        self.data["CHECK"] = self.data["Recent Volatility"] + self.data["MR Adjustment"] + self.data["Volatility Premium"] + self.data["DTM"]
+
+
 
 
     # linreg stuff
-
     def sample_every_n_days(self, subset, n=60):
         df = self.data.dropna(subset=subset).copy()
         sampled_df = df.iloc[::n].reset_index(drop=True)

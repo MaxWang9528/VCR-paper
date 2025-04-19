@@ -10,8 +10,8 @@ def main():
     buckets = 20
     days = 252
 
-    parser = DataParser('SPX.csv', 'VIX.csv', end_date='10/31/2017')
-    # parser = DataParser('SPX.csv', 'VIX.csv')
+    # parser = DataParser('SPX.csv', 'VIX.csv', end_date='10/31/2017')
+    parser = DataParser('SPX.csv', 'VIX.csv')
     evix = ExpectedVIX(parser.spx_data)
     grapher = Grapher(evix)
 
@@ -24,7 +24,7 @@ def main():
     coeffs1, _, _ = evix.calc_linear_regression(x1, y1)
     evix.calc_s_m(coeffs1)
 
-    #####################################
+    ##########################################################################
     evix.calc_mr_volatility(days=days)
     evix.calc_difference(days=days)
     sampled_df = evix.sample_every_n_days(["Average VIX Level", "Average Difference"], n=60)
@@ -33,6 +33,13 @@ def main():
     coeffs2, _, _ = evix.calc_linear_regression(x2, y2, outliers=[19])
     evix.calc_c_d(coeffs2)
 
+    evix.calc_variance_premium()
+    evix.calc_evix()
+    evix.calc_dtm()
+    evix.calc_volatility_premium()
+    evix.calc_mr_adjustment()
+    evix.calc_vcr()
+    evix.check()
 
 
 
@@ -40,7 +47,7 @@ def main():
     print(evix)
     evix.save("OUT.csv")
 
-    #####################################
+    ##########################################################################
     grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
     grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)
     grapher.vix_and_next_realized_vol_vs_date(days_label=days)
@@ -48,6 +55,7 @@ def main():
     grapher.scatter_plot("Average Difference", "Average VIX Level", df=sampled_df)
     grapher.bucket_scatter_plot("MR Volatility Squared", "Squared Difference", buckets=buckets, outliers=[19])
 
+    grapher.vix_decomposition(days=days)
 
 
 

@@ -116,17 +116,76 @@ class Grapher:
         #          label="MR Volatility", color="magenta", linewidth=2)
 
         # Plot the premium (overestimation) line
-        plt.plot(self.data["Date"], self.data["Average Premium"], label="VIX Premium", color="red", linewidth=1.5)
+        plt.plot(self.data["Date"], self.data["Average VIX Premium"], label="VIX Premium", color="red", linewidth=1.5)
 
         # Horizontal line showing average premium
-        avg_premium = self.data["Average Premium"].mean()
+        avg_premium = self.data["Average VIX Premium"].mean()
         plt.axhline(y=avg_premium, color="red", linestyle=":", linewidth=1.5,
-                    label=f"Average Premium ({avg_premium:.2f})")
+                    label=f"Average VIX Premium ({avg_premium:.2f})")
 
-        plt.title("VIX Level vs. Next Realized Volatility with Premium")
+        plt.title("VIX Level vs. Next Realized Volatility with VIX Premium")
         plt.xlabel("Date")
         plt.ylabel(f"Volatility / VIX Level ({days_label}-Day Average)")
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
         plt.show()
+
+    def vix_decomposition(self, days=1):
+        # Create rolling averages (or just use raw values if days=1)
+        data = self.data.copy()
+
+        data["Smooth VIX Level"] = data["VIX Level"].rolling(window=days).mean()
+        data["Smooth Recent Volatility"] = data["Recent Volatility"].rolling(window=days).mean()
+        data["Smooth MR Adjustment"] = data["MR Adjustment"].rolling(window=days).mean()
+        data["Smooth Volatility Premium"] = data["Volatility Premium"].rolling(window=days).mean()
+        data["Smooth DTM"] = data["DTM"].rolling(window=days).mean()
+
+        # Drop rows with NaNs (from the rolling windows)
+        data.dropna(subset=[
+            "Smooth VIX Level", "Smooth Recent Volatility", "Smooth MR Adjustment",
+            "Smooth Volatility Premium", "Smooth DTM"
+        ], inplace=True)
+
+        plt.figure(figsize=(14, 7))
+
+        # Plot smoothed components
+        plt.plot(data["Date"], data["Smooth Recent Volatility"], label="Recent Volatility", color="blue")
+        plt.plot(data["Date"], data["Smooth MR Adjustment"], label="MR Adjustment", color="green")
+        plt.plot(data["Date"], data["Smooth Volatility Premium"], label="Volatility Premium", color="orange")
+        plt.plot(data["Date"], data["Smooth DTM"], label="DTM", color="purple")
+        plt.plot(data["Date"], data["Smooth VIX Level"], label="VIX Level", color="black", linewidth=2)
+
+        plt.title(f"VIX Decomposition Over Time (Smoothed {days}-Day Average)")
+        plt.xlabel("Date")
+        plt.ylabel("Volatility / VIX Level")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+
+        # Scatter (invisible) for tooltips
+        scatter = plt.scatter(
+            data["Date"],
+            data["Smooth VIX Level"],
+            s=5,
+            alpha=0
+        )
+
+        # Tooltip with smoothed values
+        cursor = mplcursors.cursor(scatter, hover=True)
+
+        @cursor.connect("add")
+        def on_add(sel):
+            i = sel.index
+            sel.annotation.set_text(
+                f"Date: {data['Date'].iloc[i]}\n"
+                f"Recent Vol: {data['Smooth Recent Volatility'].iloc[i]:.2f}\n"
+                f"MR Adj.: {data['Smooth MR Adjustment'].iloc[i]:.2f}\n"
+                f"Premium: {data['Smooth Volatility Premium'].iloc[i]:.2f}\n"
+                f"DTM: {data['Smooth DTM'].iloc[i]:.2f}\n"
+                f"VIX: {data['Smooth VIX Level'].iloc[i]:.2f}"
+            )
+
+        plt.show()
+
+
