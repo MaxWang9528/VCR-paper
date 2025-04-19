@@ -11,34 +11,42 @@ def main():
     days = 252
 
     parser = DataParser('SPX.csv', 'VIX.csv', end_date='10/31/2017')
+    # parser = DataParser('SPX.csv', 'VIX.csv')
     evix = ExpectedVIX(parser.spx_data)
     grapher = Grapher(evix)
 
-    evix.calc_avg_vix(days=days)
+    evix.calc_vix_cols(days=days)
     evix.calc_recent_volatility(days=days)
     evix.calc_next_realized_volatility(days=days)
     evix.calc_vix_premium()
 
-    x, y, bucket_avg = evix.get_xy_buckets("Recent Volatility", "Next Realized Volatility", buckets=buckets)
-    coeffs, _, _ = evix.calc_linear_regression(x, y)
-    evix.calc_s_m(coeffs)
+    x1, y1, _ = evix.get_xy_buckets("Recent Volatility", "Next Realized Volatility", buckets=buckets)
+    coeffs1, _, _ = evix.calc_linear_regression(x1, y1)
+    evix.calc_s_m(coeffs1)
 
+    #####################################
     evix.calc_mr_volatility(days=days)
     evix.calc_difference(days=days)
+    sampled_df = evix.sample_every_n_days(["Average VIX Level", "Average Difference"], n=60)
+
+    x2, y2, _ = evix.get_xy_buckets("MR Volatility Squared", "Squared Difference", buckets=buckets)
+    coeffs2, _, _ = evix.calc_linear_regression(x2, y2, outliers=[19])
+    evix.calc_c_d(coeffs2)
+
+
+
 
 
     print(evix)
     evix.save("OUT.csv")
 
+    #####################################
+    grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
+    grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)
+    grapher.vix_and_next_realized_vol_vs_date(days_label=days)
 
-
-    # grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
-    # grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)
-    # grapher.vix_and_next_realized_vol_vs_date(days_label=days)
-    grapher.scatter_plot("Difference", "VIX Level")
-    grapher.scatter_plot("Average Difference", "Average VIX Level")
-
-    grapher.bucket_scatter_plot("MR Volatility Squared", "Difference Squared", buckets=buckets, outliers=[19])
+    grapher.scatter_plot("Average Difference", "Average VIX Level", df=sampled_df)
+    grapher.bucket_scatter_plot("MR Volatility Squared", "Squared Difference", buckets=buckets, outliers=[19])
 
 
 

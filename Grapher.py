@@ -5,11 +5,14 @@ class Grapher:
     def __init__(self, evix):
         self.evix = evix
         self.data = evix.data
-    
-    def scatter_plot(self, x_col, y_col):
-        df = self.data.dropna(subset=[x_col, y_col, "Date"])
-        fig, ax = plt.subplots(figsize=(8, 6))
 
+    def scatter_plot(self, x_col, y_col, df=None):
+        if df is None:
+            df = self.data.dropna(subset=[x_col, y_col, "Date"])
+        else:
+            df = df.dropna(subset=[x_col, y_col, "Date"])
+
+        fig, ax = plt.subplots(figsize=(8, 6))
         scatter = ax.scatter(
             df[x_col],
             df[y_col],
@@ -18,7 +21,7 @@ class Grapher:
             edgecolor="k"
         )
 
-        # Interactive tooltip
+        # Tooltip
         mplcursors.cursor(scatter, hover=True).connect(
             "add",
             lambda sel: sel.annotation.set_text(
@@ -28,7 +31,6 @@ class Grapher:
             )
         )
 
-        # Dynamic title and axis labels
         ax.set_title(f"{y_col} vs {x_col} (Interactive Scatter)", fontsize=14)
         ax.set_xlabel(x_col)
         ax.set_ylabel(y_col)
