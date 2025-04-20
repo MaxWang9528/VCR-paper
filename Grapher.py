@@ -6,6 +6,7 @@ class Grapher:
         self.evix = evix
         self.data = evix.data
 
+
     def scatter_plot(self, x_col, y_col, df=None):
         if df is None:
             df = self.data.dropna(subset=[x_col, y_col, "Date"])
@@ -38,9 +39,9 @@ class Grapher:
         plt.tight_layout()
         plt.show()
 
+
     def bucket_scatter_plot(self, x_col, y_col, buckets=20, outliers=None):
         x, y, bucket_avg = self.evix.get_xy_buckets(x_col, y_col, buckets=buckets)
-
         if outliers is None:
             outliers = []
 
@@ -103,6 +104,7 @@ class Grapher:
         plt.tight_layout()
         plt.show()
 
+
     # unique plots
     def vix_and_next_realized_vol_vs_date(self, days_label=1):
         plt.figure(figsize=(14, 7))
@@ -131,6 +133,7 @@ class Grapher:
         plt.tight_layout()
         plt.show()
 
+
     def vix_decomposition(self, days=1):
         # Create rolling averages (or just use raw values if days=1)
         data = self.data.copy()
@@ -150,11 +153,11 @@ class Grapher:
         plt.figure(figsize=(14, 7))
 
         # Plot smoothed components
-        plt.plot(data["Date"], data["Smooth Recent Volatility"], label="Recent Volatility", color="blue")
-        plt.plot(data["Date"], data["Smooth MR Adjustment"], label="MR Adjustment", color="green")
-        plt.plot(data["Date"], data["Smooth Volatility Premium"], label="Volatility Premium", color="orange")
-        plt.plot(data["Date"], data["Smooth DTM"], label="DTM", color="purple")
-        plt.plot(data["Date"], data["Smooth VIX Level"], label="VIX Level", color="black", linewidth=2)
+        plt.plot(data["Date"], data["Smooth Recent Volatility"], label="Recent Volatility", color="green")
+        plt.plot(data["Date"], data["Smooth MR Adjustment"], label="MR Adjustment", color="purple")
+        plt.plot(data["Date"], data["Smooth Volatility Premium"], label="Volatility Premium", color="red")
+        plt.plot(data["Date"], data["Smooth DTM"], label="DTM", color="magenta")
+        plt.plot(data["Date"], data["Smooth VIX Level"], label="VIX Level", color="blue", linewidth=2)
 
         plt.title(f"VIX Decomposition Over Time (Smoothed {days}-Day Average)")
         plt.xlabel("Date")
@@ -187,5 +190,55 @@ class Grapher:
             )
 
         plt.show()
+
+    def vcr_performance(self, days=1):
+        df = self.data.copy()
+
+        # Drop NaNs early
+        df.dropna(subset=["VCR", "% Change Recent Volatility", "Date"], inplace=True)
+
+        # Apply rolling averages to base signals
+        df["VCR_Smoothed"] = df["VCR"].rolling(window=days).mean()
+        df["Realized_Change_Smoothed"] = df["% Change Recent Volatility"].rolling(window=days).mean()
+
+        # Difference and performance (performance = abs error)
+        df["VCR_Diff_Smoothed"] = df["Realized_Change_Smoothed"] - df["VCR_Smoothed"]
+        df["VCR_Perf_Smoothed"] = df["VCR_Diff_Smoothed"].abs()
+
+        # Calculate averages for legend
+        avg_diff = df["VCR_Diff_Smoothed"].mean()
+        avg_perf = df["VCR_Perf_Smoothed"].mean()
+
+        plt.figure(figsize=(12, 6))
+
+        # Main lines
+        plt.plot(df["Date"], df["VCR_Smoothed"], label="VIX-Implied Change (VCR)", color="teal", linewidth=3)
+        plt.plot(df["Date"], df["Realized_Change_Smoothed"], label="Realized Volatility Change", color="orange",
+                 linewidth=3)
+
+        # VCR Difference line and average (light red with lower alpha)
+        # plt.plot(df["Date"], df["VCR_Diff_Smoothed"], label="VCR Difference", color="red", linewidth=1.5,
+        #          alpha=0.2)
+        # plt.axhline(avg_diff, color="red", linestyle="--", linewidth=1, alpha=0.4,
+        #             label=f"Avg VCR Diff: {avg_diff:.2f}")
+
+        # VCR Performance line and average (same red with higher alpha)
+        plt.plot(df["Date"], df["VCR_Perf_Smoothed"], label="VCR Performance", color="red", linewidth=1, alpha=0.4)
+        plt.axhline(avg_perf, color="red", linestyle="--", linewidth=1, alpha=0.8,
+                    label=f"Avg VCR Perf: {avg_perf:.2f}")
+
+        plt.title(f"VCR vs. Realized Volatility Change ({days}-Day Smoothing)")
+        plt.xlabel("Date")
+        plt.ylabel("Volatility Change (%)")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+
+
+
+
+
 
 

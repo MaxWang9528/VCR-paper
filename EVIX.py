@@ -15,16 +15,16 @@ class ExpectedVIX:
         return (f"Speed: {np.round(self.s, 2)}, Mean: {np.round(self.m, 2)} \n"
                 f"C: {np.round(self.c, 2)}, D: {np.round(self.d, 2)}")
 
-    def save(self, file):
-        self.data.to_csv(file)
 
     def calc_vix_cols(self, days=1):
         self.data["Average VIX Level"] = self.data["VIX Level"].rolling(window=252).mean()
         self.data["VIX Level Squared"] = self.data["VIX Level"] ** 2
 
+
     def calc_recent_volatility(self, days=1):
-        self.data["Recent Volatility"] = np.round(self.data["Change %"].rolling(window=30).std(ddof=1) * (252 ** 0.5), 2)
-        self.data["Average Recent Volatility"] = np.round(self.data["Recent Volatility"].rolling(window=days).mean(), 2)
+        self.data["Recent Volatility"] = self.data["Change %"].rolling(window=30).std(ddof=1) * (252 ** 0.5)
+        self.data["Average Recent Volatility"] = self.data["Recent Volatility"].rolling(window=days).mean()
+
 
     def calc_next_realized_volatility(self, days=1):
         next_vol = []
@@ -34,58 +34,73 @@ class ExpectedVIX:
                 vol = np.std(future_returns, ddof=1) * (252 ** 0.5)
             else:
                 vol = np.nan
-            next_vol.append(np.round(vol, 2))
+            next_vol.append(vol)
 
         self.data["Next Realized Volatility"] = next_vol
-        self.data["Average Next Realized Volatility"] = (
-            np.round(self.data["Next Realized Volatility"].rolling(window=days).mean(), 2)
-        )
+        self.data["Average Next Realized Volatility"] = (self.data["Next Realized Volatility"].rolling(window=days).mean())
+
 
     def calc_vix_premium(self):
-        self.data["VIX Premium"] = np.round(self.data["VIX Level"] - self.data["Next Realized Volatility"], 2)
+        self.data["VIX Premium"] = self.data["VIX Level"] - self.data["Next Realized Volatility"]
         self.data["Average VIX Premium"] = self.data["Average VIX Level"] - self.data["Average Next Realized Volatility"]
 
+
     def calc_mr_volatility(self, days=1):
-        self.data["MR Volatility"] = np.round(self.data["Recent Volatility"] + self.s/100 * (self.m - self.data["Recent Volatility"]), 2)
-        # self.data["Average MR Volatility"] = np.round(self.data["MR Volatility"].rolling(window=days).mean(), 2)
+        self.data["MR Volatility"] = self.data["Recent Volatility"] + self.s/100 * (self.m - self.data["Recent Volatility"])
         self.data["MR Volatility Squared"] = self.data["MR Volatility"] ** 2
+
 
     def calc_difference(self, days=1):
         self.data["Difference"] = self.data["VIX Level"] - self.data["MR Volatility"]
         self.data["Average Difference"] = self.data["Difference"].rolling(window=days).mean()
         self.data["Squared Difference"] = self.data["VIX Level Squared"] - self.data["MR Volatility Squared"]
 
+
     def calc_variance_premium(self):
         self.data["Variance Premium"] = self.c * self.data["MR Volatility"]**2 + self.d
+
 
     ########################
     def calc_evix(self):
         self.data["EVIX"] = np.sqrt(self.data["MR Volatility"]**2 + self.data["Variance Premium"])
     ########################
 
+
     def calc_dtm(self):
         self.data["DTM"] = self.data["VIX Level"] - self.data["EVIX"]
+
 
     def calc_volatility_premium(self):
         self.data["Volatility Premium"] = self.data["EVIX"] - self.data["MR Volatility"]
 
+
     def calc_mr_adjustment(self):
         self.data["MR Adjustment"] = self.data["MR Volatility"] - self.data["Recent Volatility"]
 
+
     def calc_vcr(self):
         self.data["VCR"] = self.data["MR Adjustment"] + self.data["DTM"]
+
 
     def check(self):
         self.data["CHECK"] = self.data["Recent Volatility"] + self.data["MR Adjustment"] + self.data["Volatility Premium"] + self.data["DTM"]
 
 
+    # predictive vcr
+    def calc_change_in_recent_volatility(self):
+        self.data["% Change Recent Volatility"] = self.data["Recent Volatility"] - self.data["Next Realized Volatility"]
 
+
+    def calc_vcr_performance(self):
+        self.data["VCR Difference"] = self.data["VCR"] - self.data["% Change Recent Volatility"]
+        self.data["VCR Performance"] = self.data["VCR Difference"].abs()
 
     # linreg stuff
     def sample_every_n_days(self, subset, n=60):
         df = self.data.dropna(subset=subset).copy()
         sampled_df = df.iloc[::n].reset_index(drop=True)
         return sampled_df
+
 
     def get_xy_buckets(self, x_col, y_col, buckets=20):
         df = self.data.dropna(subset=[x_col, y_col]).copy()
@@ -99,6 +114,7 @@ class ExpectedVIX:
         x = bucket_avg[x_col]
         y = bucket_avg[y_col]
         return x, y, bucket_avg
+
 
     @staticmethod
     def calc_linear_regression(x, y, outliers=None):
@@ -119,12 +135,14 @@ class ExpectedVIX:
 
         return coeffs, r_squared, y_pred
 
+
     def calc_s_m(self, coeffs):
         a = coeffs[0]
         b = coeffs[1]
 
         self.s = (1 - a) * 100
         self.m = b / (1 - a)
+
 
     def calc_c_d(self, coeffs):
         self.c = coeffs[0]

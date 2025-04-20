@@ -14,6 +14,14 @@ class DataParser:
         self.spx_data.dropna(subset=["VIX Level"], inplace=True)
 
     @staticmethod
+    def df_to_file(data, file, rounded=True):
+        rounded_data = data.copy()
+        if rounded:
+            numeric_cols = rounded_data.select_dtypes(include='number').columns
+            rounded_data[numeric_cols] = rounded_data[numeric_cols].round(2)
+        rounded_data.to_csv(file, index=False)
+
+    @staticmethod
     def _file_to_df(file):
         df = pd.read_csv(file)
         df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y').dt.date
