@@ -71,7 +71,7 @@ class ExpectedVIX:
 
 
     def calc_volatility_premium(self):
-        self.data["Volatility Premium"] = self.data["EVIX"] - self.data["MR Volatility"]
+        self.data["Variance Premium"] = self.data["EVIX"] - self.data["MR Volatility"]
 
 
     def calc_mr_adjustment(self):
@@ -83,7 +83,7 @@ class ExpectedVIX:
 
 
     def check(self):
-        self.data["CHECK"] = self.data["Recent Volatility"] + self.data["MR Adjustment"] + self.data["Volatility Premium"] + self.data["DTM"]
+        self.data["CHECK"] = self.data["Recent Volatility"] + self.data["MR Adjustment"] + self.data["Variance Premium"] + self.data["DTM"]
 
 
     # predictive vcr

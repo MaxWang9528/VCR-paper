@@ -141,13 +141,13 @@ class Grapher:
         data["Smooth VIX Level"] = data["VIX Level"].rolling(window=days).mean()
         data["Smooth Recent Volatility"] = data["Recent Volatility"].rolling(window=days).mean()
         data["Smooth MR Adjustment"] = data["MR Adjustment"].rolling(window=days).mean()
-        data["Smooth Volatility Premium"] = data["Volatility Premium"].rolling(window=days).mean()
+        data["Smooth Variance Premium"] = data["Variance Premium"].rolling(window=days).mean()
         data["Smooth DTM"] = data["DTM"].rolling(window=days).mean()
 
         # Drop rows with NaNs (from the rolling windows)
         data.dropna(subset=[
             "Smooth VIX Level", "Smooth Recent Volatility", "Smooth MR Adjustment",
-            "Smooth Volatility Premium", "Smooth DTM"
+            "Smooth Variance Premium", "Smooth DTM"
         ], inplace=True)
 
         plt.figure(figsize=(14, 7))
@@ -155,7 +155,7 @@ class Grapher:
         # Plot smoothed components
         plt.plot(data["Date"], data["Smooth Recent Volatility"], label="Recent Volatility", color="green")
         plt.plot(data["Date"], data["Smooth MR Adjustment"], label="MR Adjustment", color="purple")
-        plt.plot(data["Date"], data["Smooth Volatility Premium"], label="Volatility Premium", color="red")
+        plt.plot(data["Date"], data["Smooth Variance Premium"], label="Variance Premium", color="red")
         plt.plot(data["Date"], data["Smooth DTM"], label="DTM", color="magenta")
         plt.plot(data["Date"], data["Smooth VIX Level"], label="VIX Level", color="blue", linewidth=2)
 
@@ -184,7 +184,7 @@ class Grapher:
                 f"Date: {data['Date'].iloc[i]}\n"
                 f"Recent Vol: {data['Smooth Recent Volatility'].iloc[i]:.2f}\n"
                 f"MR Adj.: {data['Smooth MR Adjustment'].iloc[i]:.2f}\n"
-                f"Premium: {data['Smooth Volatility Premium'].iloc[i]:.2f}\n"
+                f"Premium: {data['Smooth Variance Premium'].iloc[i]:.2f}\n"
                 f"DTM: {data['Smooth DTM'].iloc[i]:.2f}\n"
                 f"VIX: {data['Smooth VIX Level'].iloc[i]:.2f}"
             )

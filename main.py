@@ -50,14 +50,14 @@ def main():
     print(evix)
     parser.df_to_file(evix.data, "OUT.csv", rounded=False)
     ########## GRAPHS    GRAPHS    GRAPHS    GRAPHS    GRAPHS ##########
-    # grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
-    # grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)
-    # grapher.vix_and_next_realized_vol_vs_date(days_label=days)
-    #
-    # grapher.scatter_plot("Average Difference", "Average VIX Level", df=sampled_df)
-    # grapher.bucket_scatter_plot("MR Volatility Squared", "Squared Difference", buckets=buckets, outliers=[19])
-    #
-    # grapher.vix_decomposition(days=days)
+    grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
+    grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)
+    grapher.vix_and_next_realized_vol_vs_date(days_label=days)
+
+    grapher.scatter_plot("Average Difference", "Average VIX Level", df=sampled_df)
+    grapher.bucket_scatter_plot("MR Volatility Squared", "Squared Difference", buckets=buckets, outliers=[19])
+
+    grapher.vix_decomposition(days=days)
     grapher.vcr_performance(days=252)
 
 
