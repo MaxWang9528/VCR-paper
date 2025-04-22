@@ -1,5 +1,7 @@
 from matplotlib import pyplot as plt
 import mplcursors
+import pandas as pd
+import numpy as np
 
 class Grapher:
     def __init__(self, evix):
@@ -13,7 +15,7 @@ class Grapher:
         else:
             df = df.dropna(subset=[x_col, y_col, "Date"])
 
-        fig, ax = plt.subplots(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=(10, 8))
         scatter = ax.scatter(
             df[x_col],
             df[y_col],
@@ -53,7 +55,7 @@ class Grapher:
         # Linear regression on inliers only
         coeffs, r_squared, y_pred = self.evix.calc_linear_regression(x_inliers, y_inliers)
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(10, 8))
 
         # Plot inliers
         inlier_scatter = ax.scatter(
@@ -133,7 +135,6 @@ class Grapher:
         plt.tight_layout()
         plt.show()
 
-
     def vix_decomposition(self, days=1):
         # Create rolling averages (or just use raw values if days=1)
         data = self.data.copy()
@@ -141,13 +142,13 @@ class Grapher:
         data["Smooth VIX Level"] = data["VIX Level"].rolling(window=days).mean()
         data["Smooth Recent Volatility"] = data["Recent Volatility"].rolling(window=days).mean()
         data["Smooth MR Adjustment"] = data["MR Adjustment"].rolling(window=days).mean()
-        data["Smooth Variance Premium"] = data["Variance Premium"].rolling(window=days).mean()
+        data["Smooth Volatility Premium"] = data["Volatility Premium"].rolling(window=days).mean()
         data["Smooth DTM"] = data["DTM"].rolling(window=days).mean()
 
         # Drop rows with NaNs (from the rolling windows)
         data.dropna(subset=[
             "Smooth VIX Level", "Smooth Recent Volatility", "Smooth MR Adjustment",
-            "Smooth Variance Premium", "Smooth DTM"
+            "Smooth Volatility Premium", "Smooth DTM"
         ], inplace=True)
 
         plt.figure(figsize=(14, 7))
@@ -155,7 +156,7 @@ class Grapher:
         # Plot smoothed components
         plt.plot(data["Date"], data["Smooth Recent Volatility"], label="Recent Volatility", color="green")
         plt.plot(data["Date"], data["Smooth MR Adjustment"], label="MR Adjustment", color="purple")
-        plt.plot(data["Date"], data["Smooth Variance Premium"], label="Variance Premium", color="red")
+        plt.plot(data["Date"], data["Smooth Volatility Premium"], label="Volatility Premium", color="red")
         plt.plot(data["Date"], data["Smooth DTM"], label="DTM", color="magenta")
         plt.plot(data["Date"], data["Smooth VIX Level"], label="VIX Level", color="blue", linewidth=2)
 
@@ -184,7 +185,7 @@ class Grapher:
                 f"Date: {data['Date'].iloc[i]}\n"
                 f"Recent Vol: {data['Smooth Recent Volatility'].iloc[i]:.2f}\n"
                 f"MR Adj.: {data['Smooth MR Adjustment'].iloc[i]:.2f}\n"
-                f"Premium: {data['Smooth Variance Premium'].iloc[i]:.2f}\n"
+                f"Volatility Premium: {data['Smooth Volatility Premium'].iloc[i]:.2f}\n"
                 f"DTM: {data['Smooth DTM'].iloc[i]:.2f}\n"
                 f"VIX: {data['Smooth VIX Level'].iloc[i]:.2f}"
             )
@@ -209,12 +210,12 @@ class Grapher:
         avg_diff = df["VCR_Diff_Smoothed"].mean()
         avg_perf = df["VCR_Perf_Smoothed"].mean()
 
-        plt.figure(figsize=(12, 6))
+        plt.figure(figsize=(14, 7))
 
         # Main lines
-        plt.plot(df["Date"], df["VCR_Smoothed"], label="VIX-Implied Change (VCR)", color="teal", linewidth=3)
+        plt.plot(df["Date"], df["VCR_Smoothed"], label="VIX-Implied Change (VCR)", color="teal", linewidth=2)
         plt.plot(df["Date"], df["Realized_Change_Smoothed"], label="Realized Volatility Change", color="orange",
-                 linewidth=3)
+                 linewidth=2)
 
         # VCR Difference line and average (light red with lower alpha)
         # plt.plot(df["Date"], df["VCR_Diff_Smoothed"], label="VCR Difference", color="red", linewidth=1.5,
@@ -227,6 +228,7 @@ class Grapher:
         plt.axhline(avg_perf, color="red", linestyle="--", linewidth=1, alpha=0.8,
                     label=f"Avg VCR Perf: {avg_perf:.2f}")
 
+        self.evix.data["Average VCR Performance"] = df["VCR_Perf_Smoothed"]
         plt.title(f"VCR vs. Realized Volatility Change ({days}-Day Smoothing)")
         plt.xlabel("Date")
         plt.ylabel("Volatility Change (%)")

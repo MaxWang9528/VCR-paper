@@ -12,6 +12,7 @@ def main():
 
     # FIRST LINREG -> FIND S AND M OF VOLATILITY MEAN REVERSION WITH RECENT VOL AND NEXT REALIZED VOL
     # parser = DataParser('SPX.csv', 'VIX.csv', end_date='10/31/2017')
+    # parser = DataParser('SPX.csv', 'VIX.csv', start_date='01/01/2015')
     parser = DataParser('SPX.csv', 'VIX.csv')
     evix = ExpectedVIX(parser.spx_data)
     grapher = Grapher(evix)
@@ -48,7 +49,8 @@ def main():
     evix.calc_vcr_performance()
 
     print(evix)
-    parser.df_to_file(evix.data, "OUT.csv", rounded=False)
+    parser.df_to_file(evix.data, "OUT.csv", rounded=True)
+
     ########## GRAPHS    GRAPHS    GRAPHS    GRAPHS    GRAPHS ##########
     grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
     grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)

@@ -71,7 +71,8 @@ class ExpectedVIX:
 
 
     def calc_volatility_premium(self):
-        self.data["Variance Premium"] = self.data["EVIX"] - self.data["MR Volatility"]
+        self.data["Volatility Premium"] = self.data["EVIX"] - self.data["MR Volatility"]
+        # evix = np.sqrt(mrvol**2 + vp) - mrvol
 
 
     def calc_mr_adjustment(self):
