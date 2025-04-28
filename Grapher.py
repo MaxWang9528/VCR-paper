@@ -193,54 +193,44 @@ class Grapher:
         plt.show()
 
     def vcr_performance(self, days=1):
-        df = self.data.copy()
-
-        # Drop NaNs early
-        df.dropna(subset=["VCR", "% Change Recent Volatility", "Date"], inplace=True)
-
-        # Apply rolling averages to base signals
-        df["VCR_Smoothed"] = df["VCR"].rolling(window=days).mean()
-        df["Realized_Change_Smoothed"] = df["% Change Recent Volatility"].rolling(window=days).mean()
-
-        # Difference and performance (performance = abs error)
-        df["VCR_Diff_Smoothed"] = df["Realized_Change_Smoothed"] - df["VCR_Smoothed"]
-        df["VCR_Perf_Smoothed"] = df["VCR_Diff_Smoothed"].abs()
-
-        # Calculate averages for legend
-        avg_diff = df["VCR_Diff_Smoothed"].mean()
-        avg_perf = df["VCR_Perf_Smoothed"].mean()
+        data = self.data.copy()
+        data.dropna(subset=["VCR Performance", "% Change Recent Volatility", "Date"], inplace=True)
 
         plt.figure(figsize=(14, 7))
 
         # Main lines
-        plt.plot(df["Date"], df["VCR_Smoothed"], label="VIX-Implied Change (VCR)", color="teal", linewidth=2)
-        plt.plot(df["Date"], df["Realized_Change_Smoothed"], label="Realized Volatility Change", color="orange",
+        plt.plot(data["Date"], data["Average VCR"], label="VIX-Implied Change (VCR)", color="teal", linewidth=2)
+        plt.plot(data["Date"], data["Average % Change Recent Volatility"], label="Realized Volatility Change", color="orange",
                  linewidth=2)
+        plt.plot(data["Date"], data["Average VCR Performance"], label="Average VCR Performance (Abs Error)", color="red", linewidth=1,
+                 alpha=0.4)
 
-        # VCR Difference line and average (light red with lower alpha)
-        # plt.plot(df["Date"], df["VCR_Diff_Smoothed"], label="VCR Difference", color="red", linewidth=1.5,
-        #          alpha=0.2)
-        # plt.axhline(avg_diff, color="red", linestyle="--", linewidth=1, alpha=0.4,
-        #             label=f"Avg VCR Diff: {avg_diff:.2f}")
+        # plt.axhline(avg_perf, color="red", linestyle="--", linewidth=1, alpha=0.8, label=f"Avg VCR Perf: {avg_perf:.2f}")
 
-        # VCR Performance line and average (same red with higher alpha)
-        plt.plot(df["Date"], df["VCR_Perf_Smoothed"], label="VCR Performance", color="red", linewidth=1, alpha=0.4)
-        plt.axhline(avg_perf, color="red", linestyle="--", linewidth=1, alpha=0.8,
-                    label=f"Avg VCR Perf: {avg_perf:.2f}")
-
-        self.evix.data["Average VCR Performance"] = df["VCR_Perf_Smoothed"]
-        plt.title(f"VCR vs. Realized Volatility Change ({days}-Day Smoothing)")
+        plt.title(f"VCR vs. Realized Volatility Change ({days}-Day Average)")
         plt.xlabel("Date")
-        plt.ylabel("Volatility Change (%)")
+        plt.ylabel("% Volatility Change / VCR % Difference")
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
         plt.show()
 
+    
+    def all_performance(self, days=1):
+        data = self.data.copy()
+        data.dropna(subset=["VCR Performance", "% Change Recent Volatility", "Date"], inplace=True)
 
 
+        plt.figure(figsize=(14, 7))
+        plt.plot(data["Date"], data["Average VCR Performance"], label="VCR Average Performance", color="teal", linewidth=1)
+        plt.plot(data["Date"], data["Average VIX Performance"], label="VIX Average Performance", color="blue", linewidth=1)
 
-
-
+        plt.title(f"Multi-metric performance({days}-Day Average)")
+        plt.xlabel("Date")
+        plt.ylabel("% Difference")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
 
 

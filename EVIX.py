@@ -17,7 +17,7 @@ class ExpectedVIX:
 
 
     def calc_vix_cols(self, days=1):
-        self.data["Average VIX Level"] = self.data["VIX Level"].rolling(window=252).mean()
+        self.data["Average VIX Level"] = self.data["VIX Level"].rolling(window=days).mean()
         self.data["VIX Level Squared"] = self.data["VIX Level"] ** 2
 
 
@@ -45,7 +45,7 @@ class ExpectedVIX:
         self.data["Average VIX Premium"] = self.data["Average VIX Level"] - self.data["Average Next Realized Volatility"]
 
 
-    def calc_mr_volatility(self, days=1):
+    def calc_mr_volatility(self):
         self.data["MR Volatility"] = self.data["Recent Volatility"] + self.s/100 * (self.m - self.data["Recent Volatility"])
         self.data["MR Volatility Squared"] = self.data["MR Volatility"] ** 2
 
@@ -79,8 +79,9 @@ class ExpectedVIX:
         self.data["MR Adjustment"] = self.data["MR Volatility"] - self.data["Recent Volatility"]
 
 
-    def calc_vcr(self):
+    def calc_vcr(self, days=1):
         self.data["VCR"] = self.data["MR Adjustment"] + self.data["DTM"]
+        self.data["Average VCR"] = self.data["VCR"].rolling(window=days).mean()
 
 
     def check(self):
@@ -88,15 +89,20 @@ class ExpectedVIX:
 
 
     # predictive vcr
-    def calc_change_in_recent_volatility(self):
+    def calc_change_in_recent_volatility(self, days=1):
         self.data["% Change Recent Volatility"] = self.data["Recent Volatility"] - self.data["Next Realized Volatility"]
+        self.data["Average % Change Recent Volatility"] = self.data["% Change Recent Volatility"].rolling(window=days).mean()
 
 
-    def calc_vcr_performance(self):
-        self.data["VCR Difference"] = self.data["VCR"] - self.data["% Change Recent Volatility"]
-        self.data["VCR Performance"] = self.data["VCR Difference"].abs()
+    def calc_metric_performance(self, days=1):
+        # self.data["VCR Difference"] = self.data["VCR"] - self.data["% Change Recent Volatility"]
+        self.data["VCR Performance"] = np.abs(self.data["VCR"] - self.data["% Change Recent Volatility"])
+        self.data["Average VCR Performance"] = self.data["VCR Performance"].rolling(window=days).mean()
+        self.data["VIX Performance"] = np.abs(self.data["VIX Level"] - self.data["% Change Recent Volatility"])
+        self.data["Average VIX Performance"] = self.data["VIX Performance"].rolling(window=days).mean()
 
-    # linreg stuff
+
+    # linreg stuffx
     def sample_every_n_days(self, subset, n=60):
         df = self.data.dropna(subset=subset).copy()
         sampled_df = df.iloc[::n].reset_index(drop=True)
