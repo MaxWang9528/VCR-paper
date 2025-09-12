@@ -13,7 +13,8 @@ class ExpectedVIX:
 
     def __str__(self):
         return (f"Speed: {np.round(self.s, 2)}, Mean: {np.round(self.m, 2)} \n"
-                f"C: {np.round(self.c, 2)}, D: {np.round(self.d, 2)}")
+                f"C: {np.round(self.c, 2)}, D: {np.round(self.d, 2)} \n"
+                f"{self.data.columns}")
 
 
     def calc_vix_cols(self, days=1):
