@@ -1,0 +1,46 @@
+Index(['Date', 'Price', 'Change %', 'VIX Level', 'Average VIX Level',
+       'VIX Level Squared', 'Recent Volatility', 'Average Recent Volatility',
+       'Next Realized Volatility', 'Average Next Realized Volatility',
+       'VIX Premium', 'Average VIX Premium', 'MR Volatility',
+       'MR Volatility Squared', 'Difference', 'Average Difference',
+       'Squared Difference', 'Variance Premium', 'EVIX', 'DTM',
+       'Volatility Premium', 'MR Adjustment', 'VCR', 'CHECK',
+       '% Change Recent Volatility', 'VCR Difference', 'VCR Performance'],
+      dtype='object')
+
+
+NO OLDER VALUES:
+	Average VIX Level
+	252
+
+	Recent Volatility
+	30
+		Average Recent Volatility
+		30+252
+
+	Average Next Realized Volatility
+	252
+
+	Average VIX Premium
+	252
+
+	MR Volatility
+	30
+		MR Volatility Squared
+		30
+
+	Difference
+	30
+		Average Difference
+		30+252
+		Squared Difference
+		30
+	
+
+
+
+
+
+
+
+NO NEWER VALUES:
