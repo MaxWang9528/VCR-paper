@@ -15,7 +15,7 @@ class Grapher:
         else:
             df = df.dropna(subset=[x_col, y_col, "Date"])
 
-        fig, ax = plt.subplots(figsize=(10, 8))
+        fig, ax = plt.subplots(figsize=(14, 8))
         scatter = ax.scatter(
             df[x_col],
             df[y_col],
@@ -55,7 +55,7 @@ class Grapher:
         # Linear regression on inliers only
         coeffs, r_squared, y_pred = self.evix.calc_linear_regression(x_inliers, y_inliers)
 
-        fig, ax = plt.subplots(figsize=(10, 8))
+        fig, ax = plt.subplots(figsize=(14, 8))
 
         # Plot inliers
         inlier_scatter = ax.scatter(
@@ -109,7 +109,7 @@ class Grapher:
 
     # unique plots
     def vix_and_next_realized_vol_vs_date(self, days_label=1):
-        plt.figure(figsize=(14, 7))
+        plt.figure(figsize=(14, 8))
 
         # Plot the two volatility measures
         plt.plot(self.data["Date"], self.data["Average VIX Level"], label="Average VIX Level", color="blue",
@@ -151,7 +151,7 @@ class Grapher:
             "Smooth Volatility Premium", "Smooth DTM"
         ], inplace=True)
 
-        plt.figure(figsize=(14, 7))
+        plt.figure(figsize=(14, 8))
 
         # Plot smoothed components
         plt.plot(data["Date"], data["Smooth Recent Volatility"], label="Recent Volatility", color="green")
@@ -205,7 +205,7 @@ class Grapher:
 
         avg_perf = data["Average VCR Performance"].mean()
 
-        plt.figure(figsize=(14, 7))
+        plt.figure(figsize=(14, 8))
 
         # Main lines
         plt.plot(data["Date"], data["Average VCR"], label="VIX-Implied Change (Average VCR)", color="teal", linewidth=2)
@@ -251,24 +251,46 @@ class Grapher:
 
         data["Average VCR"] = data["VCR"].rolling(window=days).mean()
         data["Average VIX Level"] = data["VIX Level"].rolling(window=days).mean()
+        data["Average MR"] = data["MR Adjustment"].rolling(window=days).mean()
+        data["Average Recent Volatility"] = data["Recent Volatility"].rolling(window=days).mean()
+        
+        data["Average VCR Performance"] = np.abs(data["Average VCR"] - data["Average Realized Change"])
+        data["Average VIX Performance"] = np.abs(data["Average VIX Level"] - data["Average Realized Change"])
+        data["Average MR Performance"] = np.abs(data["Average MR"] - data["Average Realized Change"])
+        data["Average RV Performance"] = np.abs(data["Average Recent Volatility"] - data["Average Realized Change"])
 
-        data["Average VCR Performance"] = data["Average VCR"] - data["Average Realized Change"]
-        data["Average VIX Performance"] = data["Average VIX Level"] - data["Average Realized Change"]
-
-        plt.figure(figsize=(14, 7))
+        plt.figure(figsize=(14, 8))
         plt.plot()
 
         # performance cols
-        plt.plot(data["Date"], data["Average VCR Performance"], label="VCR", color="teal", linewidth=2)
-        plt.plot(data["Date"], data["Average VIX Performance"], label="VIX")
+        # plt.plot(data["Date"], data["Average VCR Performance"], label="VCR", color="teal")
+        # plt.plot(data["Date"], data["Average VIX Performance"], label="VIX", color="blueviolet")
+        # plt.plot(data["Date"], data["Average MR Performance"], label="MR", color="darkred")
+
+        plt.plot(data["Date"], data["Average VCR"] - data["Average Realized Change"], label="VCR", color="teal")
+        plt.plot(data["Date"], data["Average VIX Level"] - data["Average Realized Change"], label="VIX", color="blueviolet")
+        plt.plot(data["Date"], data["Average MR"] - data["Average Realized Change"], label="MR", color="darkred")
+        plt.plot(data["Date"], data["Average Recent Volatility"] - data["Average Realized Change"], label="RV", color="magenta")
 
         # horizontal lines
         mean_vcr_perf = data["Average VCR Performance"].mean()
         mean_vix_perf = data["Average VIX Performance"].mean()
+        mean_mr_perf = data["Average MR Performance"].mean()
+        mean_rv_perf = data["Average RV Performance"].mean()
+        # (data["Average MR Performance"]).to_csv("mrperf.csv")
+        # (data["Average VIX Performance"]).to_csv("vixperf.csv")
+        # (data["Average VCR Performance"]).to_csv("vcrperf.csv")
+
+        # print(data["Average MR Performance"].head(252*2))
+
         plt.axhline(mean_vcr_perf, color="teal", linestyle="--", linewidth=1.5,
                     label=f"Avg VCR Perf: {mean_vcr_perf:.2f}")
-        plt.axhline(mean_vix_perf, color="orange", linestyle="--", linewidth=1.5,
+        plt.axhline(mean_vix_perf, color="blueviolet", linestyle="--", linewidth=1.5,
                     label=f"Avg VIX Perf: {mean_vix_perf:.2f}")
+        plt.axhline(mean_mr_perf, color="darkred", linestyle="--", linewidth=1.5,
+                    label=f"Avg MR Perf: {mean_mr_perf:.2f}")
+        plt.axhline(mean_rv_perf, color="magenta", linestyle="--", linewidth=1.5,
+                    label=f"Avg MR Perf: {mean_rv_perf:.2f}")
 
 
         plt.title(f"Performance of Different Volatility Metrics ({days}-Day Average)")
@@ -278,8 +300,28 @@ class Grapher:
         plt.legend()
         plt.tight_layout()
 
+        # Scatter (invisible) for tooltips
+        scatter = plt.scatter(
+            data["Date"],
+            data["Average VCR"] - data["Average Realized Change"],
+            s=5,
+            alpha=0
+        )
 
+        # Tooltip with performance values
+        cursor = mplcursors.cursor(scatter, hover=True)
 
+        @cursor.connect("add")
+        def on_add(sel):
+            i = sel.index
+            sel.annotation.set_text(
+                f"Date: {data['Date'].iloc[i]}\n"
+                f"VCR Diff: {data['Average VCR'].iloc[i] - data['Average Realized Change'].iloc[i]:.2f}\n"
+                f"VIX Diff: {data['Average VIX Level'].iloc[i] - data['Average Realized Change'].iloc[i]:.2f}\n"
+                f"MR Diff: {data['Average MR'].iloc[i] - data['Average Realized Change'].iloc[i]:.2f}\n"
+                f"RV Diff: {data['Average Recent Volatility'].iloc[i] - data['Average Realized Change'].iloc[i]:.2f}\n"
+                f"Realized Change: {data['Average Realized Change'].iloc[i]:.2f}"
+            )
 
         plt.show()
 

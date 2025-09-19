@@ -76,8 +76,9 @@ class ExpectedVIX:
         # evix = np.sqrt(mrvol**2 + vp) - mrvol
 
 
-    def calc_mr_adjustment(self):
+    def calc_mr_adjustment(self, days=1):
         self.data["MR Adjustment"] = self.data["MR Volatility"] - self.data["Recent Volatility"]
+        self.data["Average MR"] = self.data["MR Adjustment"].rolling(window=days).mean()
 
 
     def calc_vcr(self, days=1):
@@ -99,8 +100,12 @@ class ExpectedVIX:
         # self.data["VCR Difference"] = self.data["VCR"] - self.data["% Change Recent Volatility"]
         self.data["VCR Performance"] = np.abs(self.data["VCR"] - self.data["% Change Recent Volatility"])
         self.data["Average VCR Performance"] = self.data["VCR Performance"].rolling(window=days).mean()
+
         self.data["VIX Performance"] = np.abs(self.data["VIX Level"] - self.data["% Change Recent Volatility"])
         self.data["Average VIX Performance"] = self.data["VIX Performance"].rolling(window=days).mean()
+
+        self.data["MR Performance"] = np.abs(self.data["MR Adjustment"] - self.data["% Change Recent Volatility"])
+        self.data["Average MR Performance"] = self.data["MR Performance"].rolling(window=days).mean()
 
 
     # linreg stuffx
