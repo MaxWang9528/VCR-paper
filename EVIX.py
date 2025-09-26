@@ -71,8 +71,11 @@ class ExpectedVIX:
         self.data["DTM"] = self.data["VIX Level"] - self.data["EVIX"]
 
 
-    def calc_volatility_premium(self):
+    def calc_volatility_premium(self, days=1):
         self.data["Volatility Premium"] = self.data["EVIX"] - self.data["MR Volatility"]
+        self.data["Average Volatility Premium"] = self.data["Volatility Premium"].rolling(window=days).mean()
+
+
         # evix = np.sqrt(mrvol**2 + vp) - mrvol
 
 
@@ -106,6 +109,12 @@ class ExpectedVIX:
 
         self.data["MR Performance"] = np.abs(self.data["MR Adjustment"] - self.data["% Change Recent Volatility"])
         self.data["Average MR Performance"] = self.data["MR Performance"].rolling(window=days).mean()
+
+        self.data["RV Performance"] = np.abs(self.data["Recent Volatility"] - self.data["% Change Recent Volatility"])
+        self.data["Average RV Performance"] = np.abs(self.data["RV Performance"] - self.data["Average  Change"]).rolling(window=days).mean()
+
+        self.data["VolP Performance"] = np.abs(self.data["Volatility Premium"] - self.data["% Change Recent Volatility"])
+        self.data["Average VolP Performance"] = self.data["VolP Performance"].rolling(window=days).mean()
 
 
     # linreg stuffx

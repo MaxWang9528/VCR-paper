@@ -253,11 +253,13 @@ class Grapher:
         data["Average VIX Level"] = data["VIX Level"].rolling(window=days).mean()
         data["Average MR"] = data["MR Adjustment"].rolling(window=days).mean()
         data["Average Recent Volatility"] = data["Recent Volatility"].rolling(window=days).mean()
-        
+        data["Average VolP"] = data["Volatility Premium"].rolling(window=days).mean()
+
         data["Average VCR Performance"] = np.abs(data["Average VCR"] - data["Average Realized Change"])
         data["Average VIX Performance"] = np.abs(data["Average VIX Level"] - data["Average Realized Change"])
         data["Average MR Performance"] = np.abs(data["Average MR"] - data["Average Realized Change"])
         data["Average RV Performance"] = np.abs(data["Average Recent Volatility"] - data["Average Realized Change"])
+        data["Average VolP Performance"] = np.abs(data["Average VolP"] - data["Average Realized Change"])
 
         plt.figure(figsize=(14, 8))
         plt.plot()
@@ -271,12 +273,14 @@ class Grapher:
         plt.plot(data["Date"], data["Average VIX Level"] - data["Average Realized Change"], label="VIX", color="blueviolet")
         plt.plot(data["Date"], data["Average MR"] - data["Average Realized Change"], label="MR", color="darkred")
         plt.plot(data["Date"], data["Average Recent Volatility"] - data["Average Realized Change"], label="RV", color="magenta")
+        plt.plot(data["Date"], data["Average VolP"] - data["Average Realized Change"], label="VolP", color="orange")
 
         # horizontal lines
         mean_vcr_perf = data["Average VCR Performance"].mean()
         mean_vix_perf = data["Average VIX Performance"].mean()
         mean_mr_perf = data["Average MR Performance"].mean()
         mean_rv_perf = data["Average RV Performance"].mean()
+        mean_volp_perf = data["Average VolP Performance"].mean()
         # (data["Average MR Performance"]).to_csv("mrperf.csv")
         # (data["Average VIX Performance"]).to_csv("vixperf.csv")
         # (data["Average VCR Performance"]).to_csv("vcrperf.csv")
@@ -291,6 +295,8 @@ class Grapher:
                     label=f"Avg MR Perf: {mean_mr_perf:.2f}")
         plt.axhline(mean_rv_perf, color="magenta", linestyle="--", linewidth=1.5,
                     label=f"Avg MR Perf: {mean_rv_perf:.2f}")
+        plt.axhline(mean_volp_perf, color="orange", linestyle="--", linewidth=1.5,
+                    label=f"Avg MR Perf: {mean_volp_perf:.2f}")
 
 
         plt.title(f"Performance of Different Volatility Metrics ({days}-Day Average)")

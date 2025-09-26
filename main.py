@@ -7,7 +7,7 @@ from Grapher import Grapher
 
 def main():
     buckets = 20
-    days = 30
+    days = 252
 
     # FIRST LINREG -> FIND S AND M OF VOLATILITY MEAN REVERSION WITH RECENT VOL AND NEXT REALIZED VOL
     # parser = DataParser('SPX.csv', 'VIX.csv', end_date='10/31/2017')
@@ -45,19 +45,19 @@ def main():
     # PERFORMANCE
     evix.check()
     evix.calc_change_in_recent_volatility()
-    evix.calc_metric_performance(days=days)
+    # evix.calc_metric_performance(days=days)
 
     print(evix)
     parser.df_to_file(evix.data, "OUT.csv", rounded=True)
 
     ########## GRAPHS    GRAPHS    GRAPHS    GRAPHS    GRAPHS ##########
-    # grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
-    # grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)
-    # grapher.vix_and_next_realized_vol_vs_date(days_label=days)
-    
-    # grapher.scatter_plot("Average Difference", "Average VIX Level", df=sampled_df)
-    # grapher.bucket_scatter_plot("MR Volatility Squared", "Squared Difference", buckets=buckets, outliers=[19])
-
+    grapher.scatter_plot("Recent Volatility", "Next Realized Volatility")
+    grapher.bucket_scatter_plot("Recent Volatility", "Next Realized Volatility", buckets=20)
+    grapher.vix_and_next_realized_vol_vs_date(days_label=days)
+    #
+    grapher.scatter_plot("Average Difference", "Average VIX Level", df=sampled_df)
+    grapher.bucket_scatter_plot("MR Volatility Squared", "Squared Difference", buckets=buckets, outliers=[19])
+    #
     grapher.vix_decomposition(days=days)
     grapher.vcr_performance(days=days)
     grapher.all_performance(days=days)
