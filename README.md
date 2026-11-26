@@ -211,3 +211,9 @@ python update_csvs.py --through 2026-11-25
 2. **Rebuild.** `main.main()` runs unchanged with a non-interactive plotting backend. It rewrites `OUT.csv` and `mrperf.csv`, `vixperf.csv` and `vcrperf.csv` (the series that `Grapher.all_performance` used to save), and saves Figures 1–8 to `figures/`.
 
 The numbers in this README were computed from the updated data. They do not update themselves when the script runs.
+
+
+- Bennett, C. (2014). *Trading volatility: Trading volatility, correlation, term structure and skew*. CreateSpace Independent Publishing Platform. https://www.trading-volatility.com/Trading-Volatility.pdf
+- Edwards, T., & Preston, H. (2017). *Reading VIX®: Does VIX predict future volatility?* S&P Dow Jones Indices. https://www.spglobal.com/spdji/en/documents/research/research-reading-vix-does-vix-predict-future-volatility.pdf
+
+
