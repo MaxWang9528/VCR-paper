@@ -213,7 +213,7 @@ python update_csvs.py --through 2026-11-25
 The numbers in this README were computed from the updated data. They do not update themselves when the script runs.
 
 
-- Bennett, C. (2014). *Trading volatility: Trading volatility, correlation, term structure and skew*. CreateSpace Independent Publishing Platform. https://www.trading-volatility.com/Trading-Volatility.pdf
-- Edwards, T., & Preston, H. (2017). *Reading VIX®: Does VIX predict future volatility?* S&P Dow Jones Indices. https://www.spglobal.com/spdji/en/documents/research/research-reading-vix-does-vix-predict-future-volatility.pdf
+- Bennett, C. (2014). *Trading volatility: Trading volatility, correlation, term structure and skew*. CreateSpace Independent Publishing Platform. 
+- Edwards, T., & Preston, H. (2017). *Reading VIX®: Does VIX predict future volatility?* S&P Dow Jones Indices. 
 
 
