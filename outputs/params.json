@@ -1,0 +1,31 @@
+{
+  "config": {
+    "spx_path": "C:\\Users\\maxwa\\Documents\\__projects\\VCR-paper\\data\\raw\\SPX.csv",
+    "vix_path": "C:\\Users\\maxwa\\Documents\\__projects\\VCR-paper\\data\\raw\\VIX.csv",
+    "start": null,
+    "end": null,
+    "days": 252,
+    "vol_window": 30,
+    "buckets": 20,
+    "drop_top_buckets": 1
+  },
+  "s": 35.54771276994359,
+  "m": 15.598431127357609,
+  "c": 0.6209471856685993,
+  "d": 4.226957039728842,
+  "reg_mean_reversion": {
+    "coeffs": [
+      0.6445228723005642,
+      5.544885493770556
+    ],
+    "r_squared": 0.9669983376818259
+  },
+  "reg_variance_premium": {
+    "coeffs": [
+      0.6209471856685993,
+      4.226957039728842
+    ],
+    "r_squared": 0.9177974453429842
+  },
+  "n_rows": 8983
+}
